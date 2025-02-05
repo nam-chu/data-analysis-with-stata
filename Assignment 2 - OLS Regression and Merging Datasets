@@ -5,13 +5,17 @@ Assignment 2: By Hoang-Nam Chu and Raymond Van
 Notes Wed Feb 5
 - keep if _merge == 3
 
+Before merging:
+1. Import the dataset into memory
+2. Check for value labels using codebook if any are present
+3. Check for duplicates. 
 
 */
 
 clear 
 set more off
 set type double
-capture log off
+capture log close
 
 * Setting global macros
 
@@ -21,15 +25,35 @@ global input  "$path/Input"
 
 log using "$path/Logs/assignment_2_log", text replace
 
-* Question 3
-use "$input/co2_by_country_wb", clear // the column names are countrycode, year, and co2_mtons
+* Question 3 a and b)
+	use "$input/co2_by_country_wb", clear // the column names are countrycode, year, and co2_mtons
 
-use "$input/gdp_country_wb_usd2010", clear // country, countrycode, year, gdp_usd2010_mktp, gdp_usd2010_pcap
+	describe // there are no value labels in this dataset	
+	duplicates report countrycode year
+	
+	use "$input/gdp_country_wb_usd2010", clear // country, countrycode, year, gdp_usd2010_mktp, gdp_usd2010_pcap
+	describe // there are no value labels in this dataset as well
 
-use "$input/iso_alpha3.dta", clear // countrycode, country 
+	use "$input/iso_alpha3.dta", clear // countrycode, country
+	describe // also no value labels here 
 
-use "$input/tot_pop_country_wb", clear // countrycode, countryname, year, sp_pop_totl
+	use "$input/tot_pop_country_wb", clear // countrycode, countryname, year, sp_pop_totl	
+	describe // no value labels
+	
+	rename countryname country // we rename to country so that names are consistent
+
+	sort country year
+	duplicates report country year gdp_country_wb_usd2010
+	
+	merge 1:1 country year using "$input/gdp_country_wb_usd2010"
+	keep if _merge == 3
+	drop _merge
+	
+	merge 1:1 countrycode year using "$input/co2_by_country_wb"
+	keep if _merge == 3
+	drop _merge
+		
+* Question 3c)
 
 
-log off
-
+	log off
