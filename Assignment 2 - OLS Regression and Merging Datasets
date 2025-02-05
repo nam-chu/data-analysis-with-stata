@@ -61,5 +61,6 @@ log using "$path/Logs/assignment_2_log", text replace
 	regress co2_ktons gdp_usd2010_pcap	
 	
 	* Question 4b) 
-	regress co2_ktons 
+	gen gdp_usd2010_pcap_sq = gdp_usd2010_pcap^2
+	regress co2_ktons gdp_usd2010_pcap_sq	
 log off
