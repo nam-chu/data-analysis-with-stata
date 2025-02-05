@@ -1,1 +1,35 @@
+/*
+Assignment 2: By Hoang-Nam Chu and Raymond Van
+
+
+Notes Wed Feb 5
+- keep if _merge == 3
+
+
+*/
+
+clear 
+set more off
+set type double
+capture log off
+
+* Setting global macros
+
+global path  "/Users/home_folder/01.ECON 2708/Deliverables/Assignments/2708_A2/Data"
+global output  "$path/Output"
+global input  "$path/Input"
+
+log using "$path/Logs/assignment_2_log", text replace
+
+* Question 3
+use "$input/co2_by_country_wb", clear // the column names are countrycode, year, and co2_mtons
+
+use "$input/gdp_country_wb_usd2010", clear // country, countrycode, year, gdp_usd2010_mktp, gdp_usd2010_pcap
+
+use "$input/iso_alpha3.dta", clear // countrycode, country 
+
+use "$input/tot_pop_country_wb", clear // countrycode, countryname, year, sp_pop_totl
+
+
+log off
 
