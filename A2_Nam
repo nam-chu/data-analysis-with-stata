@@ -25,7 +25,8 @@ global input  "$path/Input"
 
 log using "$path/Logs/assignment_2_log", text replace
 
-	* Question 3 a and b)
+	* Question 3 a and b
+	
 	use "$input/co2_by_country_wb", clear // the column names are countrycode, year, and co2_mtons
 
 	describe // there are no value labels in this dataset	
@@ -46,7 +47,7 @@ log using "$path/Logs/assignment_2_log", text replace
 	sort country year
 	
 	merge 1:1 country year using "$input/gdp_country_wb_usd2010"
-	keep if _merge == 3
+	keep if _merge == 3 // investigate dropping observations
 	drop _merge
 	
 	merge 1:1 countrycode year using "$input/co2_by_country_wb"
@@ -55,7 +56,7 @@ log using "$path/Logs/assignment_2_log", text replace
 		
 	* Question 3c)
 	
-	gen co2_ktons = co2_mtons * 1000
+	gen co2_ktons = co2_mtons * 1000 / sp_pop_totl
 
 	* Question 4a)
 	regress co2_ktons gdp_usd2010_pcap	
@@ -69,6 +70,6 @@ log using "$path/Logs/assignment_2_log", text replace
 	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.country_numeric
 	
 	* Question 4d)
-	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.country_numeric i.year
+	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.year
 	stop
 log off
