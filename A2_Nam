@@ -1,59 +1,85 @@
 /*
 Assignment 2: By Hoang-Nam Chu and Raymond Van
 
-
-Notes Wed Feb 5
-- keep if _merge == 3
-
-Before merging:
-1. Import the dataset into memory
-2. Check for value labels using codebook if any are present
-3. 
-
 */
 
+// This is our classic preample that we always use at the start of our do files.
 clear 
 set more off
 set type double
 capture log close
 
-* Setting global macros
-
+// Here we are setting our global variables as macros
 global path  "/Users/home_folder/01.ECON 2708/Deliverables/Assignments/2708_A2/Data"
 global output  "$path/Output"
 global input  "$path/Input"
 
 log using "$path/Logs/assignment_2_log", text replace
 
+************************
 	* Question 3 a and b
-	
-	use "$input/co2_by_country_wb", clear // the column names are countrycode, year, and co2_mtons
+************************
 
-	describe // there are no value labels in this dataset	
-	duplicates report countrycode year
+	/*
+	While trying to merge the co2 dataset, we noticed that some of these countries are represented by a different country code (ADO & AND for Andorra). This website from UC Irvine confirms this fact - https://faculty.ucr.edu/~jorgea/econ181/country_list.pdf
 	
-	use "$input/gdp_country_wb_usd2010", clear // country, countrycode, year, gdp_usd2010_mktp, gdp_usd2010_pcap
-	describe // there are no value labels in this dataset as well
-	duplicates report country year
+	Because these entries, we have to go back and consult the iso_codes again to standardize the values:
 	
-	use "$input/iso_alpha3.dta", clear // countrycode, country
-	describe // also no value labels here 
+	Online = Dataset = Name of Country
+	ADO = AND = Andorra
+	IMY = IMN = Isle of Man
+	KSV = XKX = Kosovo
+	ROM = ROU = Romania
+	TMP = TLS  = Timor-Leste
+	WBG = PSE = West Bank and Gaza
+	ZAR = COD =  Congo, Dem. Rep.
+	
+	*/
 
-	use "$input/tot_pop_country_wb", clear // countrycode, countryname, year, sp_pop_totl	
-	describe // no value labels
+	use "$input/co2_by_country_wb", clear
+ 	replace countrycode = "AND" if countrycode == "ADO"
+ 	replace countrycode = "IMN" if countrycode == "IMY"
+ 	replace countrycode = "XKX" if countrycode == "KSV"
+ 	replace countrycode = "ROU" if countrycode == "ROM"
+ 	replace countrycode = "TLS" if countrycode == "TMP"
+ 	replace countrycode = "PSE" if countrycode == "WBG"
+ 	replace countrycode = "COD" if countrycode == "ZAR"
 	
-	rename countryname country // we rename to country so that names are consistent
+	save "$input/co2_by_country_wb_clean", replace
 
-	sort country year
+	// First we load in the iso_alpha dataset and inspect its structure. We notice that countrycode and country are the only two variables that exist, and there are no value labels. 
+	use "$input/iso_alpha3.dta", clear 
+	describe 
 	
+	// Second , we load in the dataset gdp_country_wb_usd2010. The variables are: country, countrycode, year, and gdp_usd2010_market_price, and gdp_usd_2010_percap. 
+	
+	use "$input/gdp_country_wb_usd2010", clear 
+	describe 
+	
+	// Lastly, we load in the final dataset. We can see that there are 4 variables: countrycode, countryname, year, and sp_pop_totl. 
+	use "$input/tot_pop_country_wb", clear 
+	describe 
+	rename countryname country
+	
+	
+	**** Merging *****
+	
+	// we notice that the observations associated with non-matched values correspond to regions as well as specific timeframes (before 1965)
+	sort country year 
 	merge 1:1 country year using "$input/gdp_country_wb_usd2010"
-	keep if _merge == 3 // investigate dropping observations
-	drop _merge
+	tab _merge
 	
-	merge 1:1 countrycode year using "$input/co2_by_country_wb"
+	// ***** investigate dropping observations. There doesn't seem to be a good reason to drop them for now *******
 	keep if _merge == 3
 	drop _merge
-		
+	
+	merge 1:1 countrycode year using "$input/co2_by_country_wb_clean"
+	tab _merge
+	sort  country year	
+	keep if _merge == 3
+	drop _merge
+	
+	
 	* Question 3c)
 	
 	gen co2_ktons = co2_mtons * 1000 / sp_pop_totl
@@ -73,3 +99,5 @@ log using "$path/Logs/assignment_2_log", text replace
 	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.year
 	stop
 log off
+
+
