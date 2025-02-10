@@ -84,20 +84,34 @@ log using "$path/Logs/assignment_2_log", text replace
 	
 	gen co2_ktons = co2_mtons * 1000 / sp_pop_totl
 
+
 	* Question 4a)
-	regress co2_ktons gdp_usd2010_pcap	
-	
+	regress co2_ktons gdp_usd2010_pcap
+	outreg2 using "$output/OUTREG2_OUTPUT", excel replace
+
+
 	* Question 4b) 
 	gen gdp_usd2010_pcap_sq = gdp_usd2010_pcap^2
-	regress co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq	
-	
+	regress co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq
+        outreg2 using "$output/OUTREG2_OUTPUT", excel replace label
+
+
 	* Question 4c)
 	encode country, generate(country_numeric)
 	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.country_numeric
-	
+        outreg2 using "$output/OUTREG2_OUTPUT", excel replace label
+
+
 	* Question 4d)
-	reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.year
-	stop
+	//ORIGINAL regression for 4d) reg co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.year
+	regress co2_ktons gdp_usd2010_pcap gdp_usd2010_pcap_sq i.country_numeric i.year
+	outreg2 using "$output/OUTREG2_OUTPUT", excel replace label
+
+stop
+
+save "$output/ASSIGNMENT2_SCRIPT", replace
+log close
+*EOF
 log off
 
 
