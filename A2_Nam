@@ -1,4 +1,4 @@
-/*
+d/*
 Assignment 2: By Hoang-Nam Chu and Raymond Van
 
 */
@@ -109,7 +109,7 @@ log using "$path/Logs/assignment_2_log", text replace
 
 stop
 
-save "$output/ASSIGNMENT2_SCRIPT", replace
+save "$output/ASSIGNMENT2_MERGED_DATA", replace
 log close
 *EOF
 log off
