@@ -8,3 +8,8 @@
   - export to excel and then reimport
   - save as .dta
 
+### Q2)
+  - rename all variables so that they are in lower case
+  - destring all relevant variables
+  - 
+  
