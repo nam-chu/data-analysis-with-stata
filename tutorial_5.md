@@ -2,4 +2,11 @@
 
 ## Question 1
 
-### Part a)
+### a)
+- the unit of observation is the block level (by block)
+
+### b)
+- barrio = neighbourhood
+- calle = street
+- altura = height
+- 
