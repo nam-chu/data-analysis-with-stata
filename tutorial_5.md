@@ -40,7 +40,7 @@
 ## Question 3
 ### Part a)
 - need to evaluate the sign (positve or negative), the magnitude of the sign and whether or not its statistically significant.
-- -0.087 / 0.1 * 100 this is the drop in the average number of 
+- \frac{-0.087}{0.1 * 100} this is the drop in the average number of 
 ### Part b)
 - also make sure to look at the $$R^2$$, since the model is not really good. 
 ## 
