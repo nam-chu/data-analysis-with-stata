@@ -3,10 +3,11 @@
 ## Question 1
 
 ### a)
-- the unit of observation is the block level (by block)
+- you can use `codebook` to determine whether or not there are the same number of observations are there are observation
+- you can also use `sort block month`
 
 ### b)
 - barrio = neighbourhood
 - calle = street
 - altura = height
-- 
+
