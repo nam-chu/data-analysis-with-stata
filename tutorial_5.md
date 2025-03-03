@@ -24,7 +24,13 @@
 - before: `Before July`
 - after: `After July`
 
-### e) re there any variables that you could use as additional control variables for the difference-in-differences (DID) analysis?
+### e) Are there any variables that you could use as additional control variables for the difference-in-differences (DID) analysis?
+- control variables: potentially bank would affect car thefts since there are cameras, also gas stations there are a lot cars to potentially steal, public building also because there are more people traffic and maybe more cars to be stolen 
+
+## Question 2
+### Part a)
+- generate a dummy variable using `gen var = ()`
+- 
 
 
 
