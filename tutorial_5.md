@@ -30,8 +30,19 @@
 ## Question 2
 ### Part a)
 - generate a dummy variable using `gen var = ()`
-- 
+- could also use `gen var = inlist(var, conditions)`
 
+### Part b)
+- to prepare the table you can check the means before the treatment 
+- then you can run a t-test for a difference in means
+- ideally you want to fail to reject as this would mean that the difference between the means are the same statistically speaking. There is too much noise in the data.
 
+## Question 3
+### Part a)
+- need to evaluate the sign (positve or negative), the magnitude of the sign and whether or not its statistically significant.
+- -0.087 / 0.1 * 100 this is the drop in the average number of 
+### Part b)
+- also make sure to look at the $$R^2$$, since the model is not really good. 
+## 
 
 
