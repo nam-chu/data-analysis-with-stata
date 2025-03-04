@@ -69,7 +69,7 @@ bysort country year: gen cumulative_share_percent = sum(share_income_percent)
 
 gen perfect_equality = cumulative_share_percent  // 45-degree equality line
 
-
+****THE GRAPH IS FAKENEWS. NEEDS MORE WORK. ITS JUST A CHATGPT COPYPASTE****
 twoway (line share_income_percent cumulative_share_percent, sort lcolor(blue)) ///
        (line perfect_equality cumulative_share_percent, sort lpattern(dash) lcolor(red)) ///
        , by(country year, title("Lorenz Curve by Country-Year")) ///
