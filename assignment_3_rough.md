@@ -15,8 +15,7 @@
 
 
 ********START HERE********
-
-  clear
+clear
 set more off
 capture log close
 set type double
@@ -67,13 +66,22 @@ gen share_income_percent = income / TotalIncomeForTheYear*100
 *part e*
 bysort country year: gen cumulative_share_percent = sum(share_income_percent)
 
-gen perfect_equality = cumulative_share_percent  // 45-degree equality line
+gen perfect_equality = cumulative_share_percent  // for the 45-degree equality line
 
-****THE GRAPH IS FAKENEWS. NEEDS MORE WORK. ITS JUST A CHATGPT COPYPASTE****
-twoway (line share_income_percent cumulative_share_percent, sort lcolor(blue)) ///
-       (line perfect_equality cumulative_share_percent, sort lpattern(dash) lcolor(red)) ///
+gen cumulative_population_percent = decile*10
+
+
+preserve
+keep if (country == "Canada" & (year == 1980 | year == 2014)) | (country == "China" & (year == 1980 | year == 2014))
+
+twoway (line cumulative_share_percent cumulative_population_percent, sort lcolor(blue)) ///
+       (line perfect_equality cumulative_share_percent, sort /*lpattern(dash)*/lcolor(red)) ///
        , by(country year, title("Lorenz Curve by Country-Year")) ///
        xlabel(0(10)100) ylabel(0(10)100) ///
        xtitle("Cumulative Share of Population (%)") ///
        ytitle("Cumulative Share of Income (%)") ///
        legend(order(1 "Lorenz Curve" 2 "Perfect Equality Line"))
+
+restore  // Brings back the full dataset after plotting
+	   
+graph export "$output/LORENZ_CURVE.pdf", replace
