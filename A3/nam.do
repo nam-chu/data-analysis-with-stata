@@ -1,5 +1,5 @@
 /*
-Assignment 2: By Hoang-Nam Chu and Raymond Van
+Assignment 3: By Hoang-Nam Chu and Raymond Van
 
 */
 
@@ -33,24 +33,28 @@ log using "$path/Logs/assignment_3", text replace
 	rename *, lower
 	rename decile*income decile*
 	keep if year == 1980 | year == 2014
+	
 	keep if inlist(country, "Canada", "China")
+	
 	reshape long decile, i(country year) j(decileindex)
+	
 	rename (decile decileindex) (income decile)
+	
 	bysort country year: egen annualincome = sum(income)
-	gen share_income_percent = income / annualincome*100
+	
+	gen shareincomepercent = income / annualincome*100
 	
 *part e*
-	bysort country year: gen cumulative_share_percent = sum(share_income_percent)
+	bysort country year: gen cumulativesharepercent = sum(shareincomepercent)
 
-	gen perfect_equality = cumulative_share_percent  // for the 45-degree equality line
+	gen perfectequality = cumulativesharepercent  // for the 45-degree equality line
 
-	gen cumulative_population_percent = decile*10
+	gen cumulativepopulationpercent = decile*10
 
 	preserve
-	keep if (country == "Canada" & (year == 1980 | year == 2014)) | (country == "China" & (year == 1980 | year == 2014))
 
-	twoway (line cumulative_share_percent cumulative_population_percent, sort lcolor(blue)) ///
-       (line perfect_equality cumulative_share_percent, sort /*lpattern(dash)*/lcolor(red)) ///
+	twoway (line cumulativesharepercent cumulativepopulationpercent, sort lcolor(blue)) ///
+       (line perfectequality cumulativesharepercent, sort /*lpattern(dash)*/lcolor(red)) ///
        , by(country year, title("Lorenz Curve by Country-Year")) ///
        xlabel(0(10)100) ylabel(0(10)100) ///
        xtitle("Cumulative Share of Population (%)") ///
