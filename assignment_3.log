@@ -1,0 +1,196 @@
+-----------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/home_folder/ECON 2708/Deliverables/Assignments/2708_A3/Data/Logs/assi
+> gnment_3.log
+  log type:  text
+ opened on:   9 Mar 2025, 15:01:42
+
+. 
+. 
+. ** Question 1 **
+. 
+.         clear
+
+. 
+.         * import the excel file and then save it as a .dta
+.         import excel "$path/Input/GCIPrawdata.xlsx", sheet("GCIPrawdata") cellrange(A3)
+>  firstrow clear
+(14 vars, 4,799 obs)
+
+.         save "$input/GCIPrawdata.dta", replace
+file /Users/home_folder/ECON
+    2708/Deliverables/Assignments/2708_A3/Data/Input/GCIPrawdata.dta saved
+
+.         use "$input/GCIPrawdata", clear
+
+. 
+. 
+. ** Question 2**
+. 
+. ** Part a
+.         * renaming all variables to lowercase
+.         rename *, lower
+
+. 
+. ** Part b
+.         rename decile*income decile*
+
+.         keep if year == 1980 | year == 2014
+(4,526 observations deleted)
+
+.         keep if inlist(country, "Canada", "China")
+(269 observations deleted)
+
+. 
+. ** Part c
+.         reshape long decile, i(country year) j(decileindex)
+(j = 1 2 3 4 5 6 7 8 9 10)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations                4   ->   40          
+Number of variables                  14   ->   6           
+j variable (10 values)                    ->   decileindex
+xij variables:
+           decile1 decile2 ... decile10   ->   decile
+-----------------------------------------------------------------------------
+
+.         rename (decile decileindex) (income decile)
+
+. 
+. ** Part d
+.         bysort country year: egen annualincome = sum(income)
+
+.         gen shareincomepercent = income / annualincome*100
+
+.         
+. *part e*
+.         bysort country year: gen cumulativesharepercent = sum(shareincomepercent)
+
+. 
+.         gen perfectequality = cumulativesharepercent  // for the 45-degree equality lin
+> e
+
+. 
+.         gen cumulativepopulationpercent = decile*10
+
+. 
+.         preserve
+
+. 
+.         twoway (line cumulativesharepercent cumulativepopulationpercent, sort lcolor(bl
+> ue)) ///
+>        (line perfectequality cumulativesharepercent, sort /*lpattern(dash)*/lcolor(red)
+> ) ///
+>        , by(country year, title("Lorenz Curve by Country-Year")) ///
+>        xlabel(0(10)100) ylabel(0(10)100) ///
+>        xtitle("Cumulative Share of Population (%)") ///
+>        ytitle("Cumulative Share of Income (%)") ///
+>        legend(order(1 "Lorenz Curve" 2 "Perfect Equality Line"))
+
+. 
+.         restore  // Brings back the full dataset after plotting
+
+.            
+.         graph export "$output/LORENZ_CURVE.pdf", replace
+file /Users/home_folder/ECON
+    2708/Deliverables/Assignments/2708_A3/Data/Output/LORENZ_CURVE.pdf saved as PDF
+    format
+
+. 
+. 
+. **** Part 2
+. ****** Question 1
+. 
+.         use "$input/CK1994 (1).dta", clear
+
+.         
+.         gen mealprice = pricefry + pricesoda + priceentree
+(57 missing values generated)
+
+.         
+.         gen stateXtime = state*time 
+
+.         
+.         reg mealprice state time stateXtime
+
+      Source |       SS           df       MS      Number of obs   =       763
+-------------+----------------------------------   F(3, 759)       =     12.60
+       Model |  14.9926947         3  4.99756491   Prob > F        =    0.0000
+    Residual |  301.127911       759  .396742966   R-squared       =    0.0474
+-------------+----------------------------------   Adj R-squared   =    0.0437
+       Total |  316.120606       762  .414856438   Root MSE        =    .62988
+
+------------------------------------------------------------------------------
+   mealprice | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+       state |   .3086927   .0805978     3.83   0.000     .1504716    .4669137
+        time |  -.0157487   .1039626    -0.15   0.880    -.2198372    .1883398
+  stateXtime |   .0794417   .1156924     0.69   0.493    -.1476734    .3065568
+       _cons |   3.042368   .0722517    42.11   0.000     2.900532    3.184205
+------------------------------------------------------------------------------
+
+.         
+. 
+. 
+. ****** Question 2 
+. 
+.         ** part a)
+.         use "$input/DS2004.dta", clear
+
+. 
+.         gen after = (month > 7)
+
+.         tabulate oneblock after, sum(thefts) nost nofreq
+
+                    Means of total car thefts on block
+
+    Jewish |
+institutio |
+     n one |
+     block |        after
+   distant |         0          1 |     Total
+-----------+----------------------+----------
+         0 | .08146853  .10300699 | .09343434
+         1 | .08385093  .09627329 | .09075224
+-----------+----------------------+----------
+     Total | .08190639  .10176941 |  .0929414
+
+. 
+.         ** part b)
+.         
+.         drop if month == 7
+(876 observations deleted)
+
+.         gen sameblockXafter = sameblock * after
+
+.         gen oneblockXafter = oneblock * after
+
+.         reg thefts sameblock oneblock after sameblockXafter oneblockXafter
+
+      Source |       SS           df       MS      Number of obs   =     7,008
+-------------+----------------------------------   F(5, 7002)      =      3.28
+       Model |   1.0231488         5   .20462976   Prob > F        =    0.0058
+    Residual |  436.568024     7,002  .062349047   R-squared       =    0.0023
+-------------+----------------------------------   Adj R-squared   =    0.0016
+       Total |  437.591173     7,007  .062450574   Root MSE        =     .2497
+
+---------------------------------------------------------------------------------
+         thefts | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+----------------+----------------------------------------------------------------
+      sameblock |   .0167424   .0243384     0.69   0.492    -.0309682     .064453
+       oneblock |  -.0037377   .0126388    -0.30   0.767    -.0285137    .0210383
+          after |   .0108407   .0070032     1.55   0.122    -.0028878    .0245692
+sameblockXafter |  -.0883182   .0307859    -2.87   0.004    -.1486678   -.0279685
+ oneblockXafter |  -.0066999    .015987    -0.42   0.675    -.0380393    .0246395
+          _cons |   .0958702   .0055366    17.32   0.000     .0850169    .1067235
+---------------------------------------------------------------------------------
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Users/home_folder/ECON 2708/Deliverables/Assignments/2708_A3/Data/Logs/assi
+> gnment_3.log
+  log type:  text
+ closed on:   9 Mar 2025, 15:01:45
+-----------------------------------------------------------------------------------------
