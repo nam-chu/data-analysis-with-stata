@@ -72,7 +72,7 @@ log using "$path/Logs/assignment_3", text replace
 **** Part 2
 ****** Question 1
 
-	use "$input/CK1994 (1).dta", clear
+	use "$input/CK1994.dta", clear
 	
 	gen mealprice = pricefry + pricesoda + priceentree
 	
