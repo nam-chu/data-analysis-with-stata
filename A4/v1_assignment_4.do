@@ -39,10 +39,23 @@ save "$input/assignment_4_data.dta", replace
 	*Question 2a
 **************************
 
+* group renaming everything
+
+rename (S002EVS S003 S006 A009 A170 C036 C037 C038 C039 C041 X001 X003 X007 X011_01 X025A X028 X047D) (evs_wave country resp_num state_of_health /// 
+satisfaction_life talents_job receive_money work_lazy work_duty work_spare_time sex ///
+age marital_status children educational_level employment_status month_income)
+
+
 **************************
 	*Question 2b
 **************************
 
-foreach var in varlist {
-	replace ".a" == ""
+* checking whether the first four columns have .a in any observations
+
+tabulate(evs_wave) 
+tabulate (country) 
+
+foreach var of varlist state_of_health-month_income {
+    replace `var' = "" if `var' == ".a"
 }
+
