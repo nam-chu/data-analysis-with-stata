@@ -31,7 +31,7 @@ forvalues i = 1/4 {
 use "$temp/assignment_4_data_1.dta", clear
 
 forvalues j = 2/4 {
-	append using "assignment_4_data_`j'.dta"
+	append using "$temp/assignment_4_data_`j'.dta"
 }
 save "$input/assignment_4_data.dta", replace
 
@@ -59,3 +59,11 @@ foreach var of varlist state_of_health-month_income {
     replace `var' = "" if `var' == ".a"
 }
 
+
+
+**************************
+	*Question 2b
+**************************
+
+* Part c(vii)
+gen education_numeric = substr(educational_level, 1, 1)
