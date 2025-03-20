@@ -1,0 +1,263 @@
+
+clear 
+set more off
+set type double
+capture log close
+
+
+global path "C:\Users\raymo\OneDrive\Desktop\SCHOOL\2025 Winter Semester\ECON 2708\ASSIGNMENT\ASSIGNMENT 4\Data"
+global input "$path/Input" 
+global output "$path/Output"
+global temp "$path/Temp"
+
+log using "$path/Logs/v1_assignment_4", text replace
+
+
+**************************
+	*Question 1b and c*
+**************************
+
+
+/*
+The first loop brings all the excel sheets into stata and then saves them as .dta. The second loop then appends them onto the first dataset and renames it.
+*/
+clear
+
+	forvalues i = 1/4 {
+		import excel "$input/EVSdata.xlsx", sheet("Wave `i'") firstrow
+		save "$temp/assignment_4_data_`i'.dta", replace
+		clear
+	} 
+	
+	use "$temp/assignment_4_data_1.dta", clear
+
+	forvalues j = 2/4 {
+		append using "$temp/assignment_4_data_`j'.dta"
+	}
+	save "$input/assignment_4_data.dta", replace
+
+
+**************************
+	*Question 2a
+**************************
+
+* group renaming everything
+	use "$input/assignment_4_data", clear
+	rename (S002EVS S003 S006 A009 A170 C036 C037 C038 C039 C041 X001 X003 X007 X011_01 X025A X028 X047D) (evs_wave country resp_num state_of_health /// 
+	satisfaction_life talents_job receive_money work_lazy work_duty work_spare_time sex ///
+	age marital_status children educational_level employment_status month_income)
+
+
+**************************
+	*Question 2b
+**************************
+
+* checking whether the first four columns have .a in any observations
+
+	tabulate(evs_wave) 
+	tabulate (country) 
+
+	foreach var of varlist state_of_health-month_income {
+	replace `var' = "" if `var' == ".a"
+	}
+
+
+
+**************************
+	*Question 2c
+**************************
+
+* (i)
+	
+	// replace all instances of 10 and 1 with satisfied and dissatisfied, respectivly. Destring all instances in satisfaction life 
+	replace satisfaction_life = "10" if satisfaction_life == "Satisfied"
+	replace satisfaction_life = "1" if satisfaction_life == "Dissatisfied"
+	destring satisfaction_life, replace
+	
+	
+* (ii)
+	
+	// go through varlist and replace each instance of each variable accordingly
+	foreach var of varlist talents_job-work_spare_time {
+		replace `var' = "1" if `var' == "Strongly disagree"
+		replace `var' = "2" if `var' == "Disagree"
+		replace `var' = "3" if `var' == "Neither agree nor disagree"
+		replace `var' = "4" if `var' == "Agree"
+		replace `var' = "5" if `var' == "Strongly agree"
+	}
+	// destringing every string in the above varlist
+	foreach var of varlist talents_job-work_spare_time {
+		destring `var', replace
+	}
+
+* (iii)
+	// replace all instances of entry accordingly.
+	replace state_of_health = "1" if state_of_health == "Very poor"
+	replace state_of_health = "2" if state_of_health == "Poor"
+	replace state_of_health = "3" if state_of_health == "Fair"
+	replace state_of_health = "4" if state_of_health == "Good"
+	replace state_of_health = "5" if state_of_health == "Very good"
+	// destring the variable
+	destring state_of_health, replace
+
+* (iv)
+
+	// defines value labels 
+	label define wave_label 1 "1981-1984" 2 "1990-1993" 3 "1999-2001" 4 "2008-2010"
+	
+	// encode all values 
+	encode evs_wave, gen(wave_num) label(wave_label) 
+	
+	// dropping, renaming, and reordering
+	drop evs_wave
+	rename wave_num evs_wave
+	order evs_wave, before (country)
+	
+	// generates a sex dummy if sex is equal to male (1) otherwise, assignment 0 
+	gen sex_dummy = (sex == "Male") if inlist(sex, "Male", "Female")
+	
+	// check to see if anything is missing 
+	tab sex sex_dummy, missing
+	
+	// drops the sex variable and renames the sex_dummy to align with data dictionary. 
+	drop sex
+	rename sex_dummy sex
+	order sex, after (work_spare_time) // moves the sex value to appropriate place to match data dictionary
+	
+* (v)
+	// destringing
+	destring month_income age, replace 
+	*codebook month_income age
+
+* (vi)
+	// replace and destring
+	replace children = "0" if children == "No children"
+	destring children, replace
+	
+* (vii)
+
+	// creates a substring that separates the first number and the text part of the answer
+	gen education_numeric = substr(educational_level, 1, 1)
+	destring education_numeric, replace
+	order education_numeric, before(educational_level)
+
+* (viii)
+
+	// creating a dummy variable 
+	gen married = (marital_status == "Married" | marital_status == "Living together as married") ///
+    if inlist(marital_status, "Married", "Living together as married", "Divorced", "Separated", "Single/Never married", "Widowed")
+	
+	tab married marital_status, missing
+	
+**************************
+	*Question 2d
+**************************
+	
+	// needs some work 
+	egen indiv_work_ethic = rowmean(talents_job-work_spare_time)
+
+	egen work_ethic = mean(indiv_work_ethic), by(country evs_wave)
+	egen work_ethic_ = mean(indiv_work_ethic), by(country evs_wave)
+
+
+**************************
+	*Question 2e
+**************************
+	
+	* Generate full-time dummy 
+ 	gen full_time_dummy = (employment_status == "Full time") if employment_status != ""
+
+* Generate unemployed dummy
+	gen unemployed_dummy = (employment_status == "Unemployed") if employment_status != ""
+
+* Generate other employed dummy (Part time or Self employed)
+	gen other_employed_dummy = (employment_status == "Part time" | employment_status == "Self employed") if employment_status != ""
+
+	
+/*local wave 1981-1984 1990-1993 1999-2001 2008-2010
+local variable satisfaction_life work_ethic full_time_dummy state_of_health sex age children education_numeric 
+*/
+	
+*************
+*QUESTION 3A* 
+*************
+
+// Variables satisfaction_life full_time_dummy sex age are present in all the wave surveys
+
+tabstat satisfaction_life work_ethic full_time_dummy state_of_health sex age children education_numeric , by(evs_wave) stat(N)
+
+*************
+*QUESTION 3B* 
+*************
+
+//Variable that shows the most difference in the means between men and women is the full_time_dummy
+
+tabstat satisfaction_life work_ethic full_time_dummy state_of_health age children education_numeric, ///
+    by(sex) stat(mean sd)
+
+*************
+*QUESTION 3C* 
+*************
+
+//The trend is that the mean gets lower as the wave increases
+
+tabstat satisfaction_life, by(evs_wave) stat(mean sd)
+
+*************
+*QUESTION 3D*
+*************
+
+//The only two remaining waves of survey are the 1999-2001 and 2008-2010
+
+drop if missing(satisfaction_life) | missing(work_ethic)
+
+*************
+*QUESTION 4A*
+*************
+
+//Adjusted R-Squared = 0.1038
+//Dummy Variables for unemployment are all statistically significant
+//I expected the sign for married to be positive. This was matched
+//I expected the sign for age to be negative. This was matched
+
+regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income
+
+*************
+*QUESTION 4B*
+*************
+
+//Adjusted R-Squared = 0.0876
+//Count of observations is 104,980
+//Count of evs_wave is 65,746 
+// We lost 104,980 - 65,746 = 39,234 
+//There does not seem to be major changes within the two regression results.
+
+count
+count if evs_wave == 2008-2010
+
+regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income if evs_wave == 4
+
+*************
+*QUESTION 4C*
+*************
+
+//Adjusted R-Squared = 0.1911
+//work ethic increased by 11.79%)
+//full_time_dummy increased by 66.27%
+//unemployed_dummy decreased by 13.68%
+//other_employed_dummy increased by 99.60%
+
+regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income state_of_health children education_numeric
+
+*************
+*QUESTION 4D*
+*************
+
+//Adjusted R-Squared = 21.50
+//work ethic decreased by 65.70%)
+//full_time_dummy decreased by 7.39%
+//unemployed_dummy increased by 0.90%
+//other_employed_dummy decreased by 12.12%
+encode country, generate(country_num)
+
+regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income state_of_health children education_numeric i.country_num
