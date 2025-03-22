@@ -178,7 +178,7 @@ clear
 local variable satisfaction_life work_ethic full_time_dummy state_of_health sex age children education_numeric 
 */
 	
-*************
+*****************************
 *QUESTION 3A* 
 *************
 
@@ -186,7 +186,7 @@ local variable satisfaction_life work_ethic full_time_dummy state_of_health sex 
 
 tabstat satisfaction_life work_ethic full_time_dummy state_of_health sex age children education_numeric , by(evs_wave) stat(N)
 
-*************
+*****************************
 *QUESTION 3B* 
 *************
 
@@ -200,6 +200,7 @@ tabstat satisfaction_life work_ethic full_time_dummy state_of_health age childre
 *************
 
 //The trend is that the mean gets lower as the wave increases
+//The trend is that the standard deviation gets higher as the wave increases until the last wave where it dips.
 
 tabstat satisfaction_life, by(evs_wave) stat(mean sd)
 
@@ -221,6 +222,7 @@ drop if missing(satisfaction_life) | missing(work_ethic)
 //I expected the sign for age to be negative. This was matched
 
 regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income
+outreg2 using "$output/OUTREG2_OUTPUT", excel replace 
 
 *************
 *QUESTION 4B*
@@ -236,6 +238,7 @@ count
 count if evs_wave == 2008-2010
 
 regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income if evs_wave == 4
+outreg2 using "$output/OUTREG2_OUTPUT", excel append
 
 *************
 *QUESTION 4C*
@@ -248,7 +251,7 @@ regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_empl
 //other_employed_dummy increased by 99.60%
 
 regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income state_of_health children education_numeric
-
+outreg2 using "$output/OUTREG2_OUTPUT", excel append 
 *************
 *QUESTION 4D*
 *************
@@ -260,4 +263,6 @@ regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_empl
 //other_employed_dummy decreased by 12.12%
 encode country, generate(country_num)
 
-regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income state_of_health children education_numeric i.country_num
+regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income state_of_health children education_numeric ib46.country_num
+
+outreg2 using "$output/OUTREG2_OUTPUT", excel append label
