@@ -235,7 +235,7 @@ outreg2 using "$output/OUTREG2_OUTPUT", excel replace
 //There does not seem to be major changes within the two regression results.
 
 count
-count if evs_wave == 2008-2010
+count if evs_wave == 4
 
 regress satisfaction_life work_ethic full_time_dummy unemployed_dummy other_employed_dummy married sex age month_income if evs_wave == 4
 outreg2 using "$output/OUTREG2_OUTPUT", excel append
